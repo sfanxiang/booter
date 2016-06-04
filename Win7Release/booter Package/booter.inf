@@ -8,7 +8,7 @@ Class=Sample ; TODO: edit Class
 ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
 Provider=%ManufacturerName%
 CatalogFile=booter.cat
-DriverVer=06/04/2016,5.11.35.611
+DriverVer=06/05/2016,7.56.52.491
 
 [DestinationDirs]
 DefaultDestDir = 12

@@ -3,10 +3,12 @@ ifndef X64
 .model flat, c
 endif
 
+.code
+
 reboot proc
 	cli
 	mov dx, 64h
-_reboot_test;
+_reboot_test:
 	in al, dx
 	test al, 2
 	jnz _reboot_test
