@@ -11,6 +11,7 @@ void __cdecl cmos_set_warm_reset();
 #define BIOS_WARM_RESET_VECTOR ((size_t)0x467L)
 #define BOOT_IMAGE_BASE ((size_t)0x8000L)
 
+char phy_memcpy(size_t pos, const char *data, size_t size);
 char write_boot_image(char *data, size_t size);
 
 #endif

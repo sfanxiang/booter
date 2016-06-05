@@ -14,18 +14,12 @@ char modify_file(PCWSTR name, ULONG shared, const char *data, const size_t size,
 	NTSTATUS ntstatus;
 	IO_STATUS_BLOCK ioStatusBlock;
 
-	// Do not try to perform any file operations at higher IRQL levels.
-	// Instead, you may use a work item or a system worker thread to perform file operations.
-
-	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
-		return 0;
-
 	ntstatus = ZwOpenFile(&handle,
 		GENERIC_WRITE,
 		&objAttr, &ioStatusBlock,
 		shared,
 		FILE_SYNCHRONOUS_IO_NONALERT);
-
+	
 	if (NT_SUCCESS(ntstatus)) {
 		LARGE_INTEGER byteOffset;
 		byteOffset.QuadPart = skip;
@@ -50,12 +44,6 @@ char write_file(PCWSTR name, ULONG shared, const char *data, const size_t size)
 	HANDLE handle;
 	NTSTATUS ntstatus;
 	IO_STATUS_BLOCK ioStatusBlock;
-
-	// Do not try to perform any file operations at higher IRQL levels.
-	// Instead, you may use a work item or a system worker thread to perform file operations.
-
-	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
-		return 0;
 
 	ntstatus = ZwCreateFile(&handle,
 		GENERIC_WRITE,
@@ -88,12 +76,6 @@ size_t read_file(PCWSTR name, ULONG shared, char *buffer, const size_t size, con
 	HANDLE handle;
 	NTSTATUS ntstatus;
 	IO_STATUS_BLOCK ioStatusBlock;
-
-	// Do not try to perform any file operations at higher IRQL levels.
-	// Instead, you may use a work item or a system worker thread to perform file operations.
-
-	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
-		return 0;
 
 	ntstatus = ZwCreateFile(&handle,
 		GENERIC_READ,
