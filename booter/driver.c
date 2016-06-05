@@ -23,15 +23,22 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 	char run_buffer[RUN_MAX + 1], image_buffer[IMAGE_MAX + 1];
 	size_t run_size, image_size; 
 	
-	run_size = read_file(RUN_FILE, run_buffer, RUN_MAX);
+	run_size = read_file(RUN_FILE, 0, run_buffer, RUN_MAX, 0);
 	for (size_t i = 0; i < run_size; i++) {
 		switch (run_buffer[i]) {
 		case 'm':
-			write_file(MESSAGE_FILE, TEST_MESSAGE, sizeof(TEST_MESSAGE) - 1);
+			if (!write_file(MESSAGE_FILE, 0, TEST_MESSAGE, sizeof(TEST_MESSAGE) - 1)) {
+				return STATUS_SUCCESS;
+			}
 			break;
 		case 'w':
-			image_size = read_file(IMAGE_FILE, image_buffer, IMAGE_MAX);
-			write_boot_image(image_buffer, image_size);
+			image_size = read_file(IMAGE_FILE, 0, image_buffer, IMAGE_MAX, 0);
+			if (image_size == 0) {
+				return STATUS_SUCCESS;
+			}
+			if (!write_boot_image(image_buffer, image_size)) {
+				return STATUS_SUCCESS;
+			}
 			cmos_set_warm_reset();
 			break;
 		case 'r':

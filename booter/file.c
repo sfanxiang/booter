@@ -1,6 +1,43 @@
 #include "file.h"
 
-char write_file(PCWSTR name, const char *data, const size_t size)
+char modify_file(PCWSTR name, ULONG shared, const char *data, const size_t size, const long long skip)
+{
+	UNICODE_STRING uniName;
+	OBJECT_ATTRIBUTES objAttr;
+
+	RtlInitUnicodeString(&uniName, name);
+	InitializeObjectAttributes(&objAttr, &uniName,
+		OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
+		NULL, NULL);
+
+	HANDLE handle;
+	NTSTATUS ntstatus;
+	IO_STATUS_BLOCK ioStatusBlock;
+
+	// Do not try to perform any file operations at higher IRQL levels.
+	// Instead, you may use a work item or a system worker thread to perform file operations.
+
+	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
+		return 0;
+
+	ntstatus = ZwOpenFile(&handle,
+		GENERIC_WRITE,
+		&objAttr, &ioStatusBlock,
+		shared,
+		FILE_SYNCHRONOUS_IO_NONALERT);
+
+	if (NT_SUCCESS(ntstatus)) {
+		LARGE_INTEGER byteOffset;
+		byteOffset.QuadPart = skip;
+		ntstatus = ZwWriteFile(handle, NULL, NULL, NULL, &ioStatusBlock,
+			(void*)data, (ULONG)size, &byteOffset, NULL);
+		ZwClose(handle);
+	}
+
+	return NT_SUCCESS(ntstatus);
+}
+
+char write_file(PCWSTR name, ULONG shared, const char *data, const size_t size)
 {
 	UNICODE_STRING uniName;
 	OBJECT_ATTRIBUTES objAttr;
@@ -24,7 +61,7 @@ char write_file(PCWSTR name, const char *data, const size_t size)
 		GENERIC_WRITE,
 		&objAttr, &ioStatusBlock, NULL,
 		FILE_ATTRIBUTE_NORMAL,
-		0,
+		shared,
 		FILE_OVERWRITE_IF,
 		FILE_SYNCHRONOUS_IO_NONALERT,
 		NULL, 0);
@@ -38,7 +75,7 @@ char write_file(PCWSTR name, const char *data, const size_t size)
 	return NT_SUCCESS(ntstatus);
 }
 
-size_t read_file(PCWSTR name, char *buffer, const size_t size)
+size_t read_file(PCWSTR name, ULONG shared, char *buffer, const size_t size, const long long skip)
 {
 	UNICODE_STRING uniName;
 	OBJECT_ATTRIBUTES objAttr;
@@ -58,20 +95,19 @@ size_t read_file(PCWSTR name, char *buffer, const size_t size)
 	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
 		return 0;
 
-	LARGE_INTEGER byteOffset;
-
 	ntstatus = ZwCreateFile(&handle,
 		GENERIC_READ,
 		&objAttr, &ioStatusBlock,
 		NULL,
 		FILE_ATTRIBUTE_NORMAL,
-		0,
+		shared,
 		FILE_OPEN,
 		FILE_SYNCHRONOUS_IO_NONALERT,
 		NULL, 0);
 
 	if (NT_SUCCESS(ntstatus)) {
-		byteOffset.QuadPart = 0;
+		LARGE_INTEGER byteOffset;
+		byteOffset.QuadPart = skip;
 		ntstatus = ZwReadFile(handle, NULL, NULL, NULL, &ioStatusBlock,
 			buffer, (ULONG)size, &byteOffset, NULL);
 		ZwClose(handle);
