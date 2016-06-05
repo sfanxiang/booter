@@ -1,0 +1,91 @@
+;
+; booter.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=booter.cat
+DriverVer=06/05/2016,7.56.16.739
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+booter.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTamd64
+
+[Standard.NTamd64]
+%booter.DeviceDesc%=booter_Device, Root\booter ; TODO: edit hw-id
+
+[booter_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+booter.sys
+
+;-------------- Service installation
+[booter_Device.NT.Services]
+AddService = booter,%SPSVCINST_ASSOCSERVICE%, booter_Service_Inst
+
+; -------------- booter driver install sections
+[booter_Service_Inst]
+DisplayName    = %booter.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\booter.sys
+LoadOrderGroup = Extended Base
+
+;
+;--- booter_Device Coinstaller installation ------
+;
+
+[DestinationDirs]
+booter_Device_CoInstaller_CopyFiles = 11
+
+[booter_Device.NT.CoInstallers]
+AddReg=booter_Device_CoInstaller_AddReg
+CopyFiles=booter_Device_CoInstaller_CopyFiles
+
+[booter_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01011.dll,WdfCoInstaller"
+
+[booter_Device_CoInstaller_CopyFiles]
+WdfCoInstaller01011.dll
+
+[SourceDisksFiles]
+WdfCoInstaller01011.dll=1 ; make sure the number matches with SourceDisksNames
+
+[booter_Device.NT.Wdf]
+KmdfService =  booter, booter_wdfsect
+[booter_wdfsect]
+KmdfLibraryVersion = 1.11
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="" ; TODO: add ManufacturerName
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "booter Installation Disk"
+booter.DeviceDesc = "booter Device"
+booter.SVCDESC = "booter Service"
