@@ -4,4 +4,4 @@
 
 ## Usage
 * Place booter_run.txt and booter_image at C:\, then load the driver.
-* It will perform a reset immediately.
+* It will perform a reboot immediately.
