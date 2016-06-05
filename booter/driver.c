@@ -20,25 +20,27 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 	UNREFERENCED_PARAMETER(DriverObject);
 	UNREFERENCED_PARAMETER(RegistryPath);
 
-	char buffer[4096];
-	size_t size; 
+	char run_buffer[RUN_MAX + 1], image_buffer[IMAGE_MAX + 1];
+	size_t run_size, image_size; 
 	
-	size = read_file(RUN_FILE, buffer, RUN_MAX);
-	for (char *p = buffer; *p != '\0'; p++) {
-		switch (*p) {
+	run_size = read_file(RUN_FILE, run_buffer, RUN_MAX);
+	for (size_t i = 0; i < run_size; i++) {
+		switch (run_buffer[i]) {
 		case 'm':
-			write_file(MESSAGE_FILE, TEST_MESSAGE, sizeof(TEST_MESSAGE));
+			write_file(MESSAGE_FILE, TEST_MESSAGE, sizeof(TEST_MESSAGE) - 1);
 			break;
 		case 'w':
-			// write
+			image_size = read_file(IMAGE_FILE, image_buffer, IMAGE_MAX);
+			write_boot_image(image_buffer, image_size);
+			cmos_set_warm_reset();
 			break;
 		case 'r':
 			reboot();
 			break;
+		default:
+			break;
 		}
 	}
-
-	// write_file(L"\\DosDevices\\C:\\test.txt", "test\n", 5);
 
 	return STATUS_SUCCESS;
 }

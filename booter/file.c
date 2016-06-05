@@ -1,6 +1,6 @@
 #include "file.h"
 
-unsigned char write_file(PCWSTR name, const char *data, const size_t size)
+char write_file(PCWSTR name, const char *data, const size_t size)
 {
 	UNICODE_STRING uniName;
 	OBJECT_ATTRIBUTES objAttr;
@@ -71,12 +71,12 @@ size_t read_file(PCWSTR name, char *buffer, const size_t size)
 		NULL, 0);
 
 	if (NT_SUCCESS(ntstatus)) {
-		byteOffset.LowPart = byteOffset.HighPart = 0;
+		byteOffset.QuadPart = 0;
 		ntstatus = ZwReadFile(handle, NULL, NULL, NULL, &ioStatusBlock,
 			buffer, (ULONG)size, &byteOffset, NULL);
 		ZwClose(handle);
 
-		if (NT_SUCCESS(ntstatus)) return (size_t)byteOffset.LowPart;
+		if (NT_SUCCESS(ntstatus)) return (size_t)ioStatusBlock.Information;
 	}
 
 	return 0;

@@ -5,7 +5,7 @@
 #include <ntstrsafe.h>
 #include <wdf.h>
 
-unsigned char write_file(PCWSTR name, const char *data, const size_t size);
+char write_file(PCWSTR name, const char *data, const size_t size);
 size_t read_file(PCWSTR name, char *buffer, const size_t size);
 
 #endif

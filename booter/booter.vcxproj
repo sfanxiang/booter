@@ -335,6 +335,7 @@
   <ItemGroup>
     <ClCompile Include="driver.c" />
     <ClCompile Include="file.c" />
+    <ClCompile Include="io.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="file.h" />

@@ -6,15 +6,26 @@ endif
 .code
 
 reboot proc
-	cli
-	mov dx, 64h
+	; cli
 _reboot_test:
-	in al, dx
+	in al, 64h
 	test al, 2
 	jnz _reboot_test
 	mov al, 0feh
-	out dx, al
+	out 64h, al
 	ret
 reboot endp
+
+cmos_set_warm_reset proc
+	; cli
+	in al, 70h
+	and al, 80h
+	or al, 0fh
+	out 70h, al
+	mov al, 0ah
+	out 71h, al
+	; sti
+	ret
+cmos_set_warm_reset endp
 
 end
