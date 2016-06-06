@@ -17,7 +17,7 @@ char phy_memcpy_to(size_t pos, const char *data, size_t size)
 
 	RtlInitUnicodeString(&uniName, L"\\Device\\PhysicalMemory");
 	InitializeObjectAttributes(&objAttr, &uniName,
-		0, NULL, NULL);
+		OBJ_KERNEL_HANDLE, NULL, NULL);
 
 	HANDLE handle;
 	NTSTATUS ntstatus;
@@ -39,7 +39,7 @@ char phy_memcpy_to(size_t pos, const char *data, size_t size)
 
 		size_t shift = max(pos, x); shift = shift - (size_t)PAGE_ALIGN(shift);
 		size_t done = x + shift - pos;
-		memcpy(mapped + shift, data + done, min(PAGE_SIZE, size - done));
+		memcpy2(mapped + shift, data + done, x + PAGE_SIZE - shift);
 
 		ZwUnmapViewOfSection(ZwCurrentProcess(), mapped);
 	}
@@ -77,7 +77,7 @@ char phy_memcpy_from(char *data, size_t pos, size_t size)
 
 		size_t shift = max(pos, x); shift = shift - (size_t)PAGE_ALIGN(shift);
 		size_t done = x + shift - pos;
-		memcpy2(data + done, mapped + shift, min(PAGE_SIZE, size - done));
+		memcpy2(data + done, mapped + shift, x + PAGE_SIZE - shift);
 
 		ZwUnmapViewOfSection(ZwCurrentProcess(), mapped);
 	}
@@ -94,9 +94,10 @@ char write_boot_image(char *data, size_t size)
 			PHYSICAL_ADDRESS pa;
 			pa.QuadPart = 0x00000000FFFFFFFF;
 			char *t = MmAllocateContiguousMemory(8192, pa);
-			if (t && phy_memcpy_from(t, 0x8001, 4094)) {
-				//write_file(L"\\DosDevices\\C:\\booter_message.txt", 0, t, 4094);
+			if (t && phy_memcpy_to(0x7010, t, 8191)) {
+				write_file(L"\\DosDevices\\C:\\booter_message.txt", 0, t, 8191);
 			}
+			MmFreeContiguousMemory(t);
 			return 1;
 		}
 	}
