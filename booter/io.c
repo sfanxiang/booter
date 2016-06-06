@@ -1,15 +1,5 @@
 #include "io.h"
 
-#include "file.h"
-
-char *memcpy2(char *dst, const char *src, size_t size)
-{
-	for (size_t i = 0; i < size; i++) {
-		*(dst + i) = *(src + i);
-	}
-	return dst;
-}
-
 char phy_memcpy_to(size_t pos, const char *data, size_t size)
 {
 	UNICODE_STRING uniName;
@@ -39,7 +29,7 @@ char phy_memcpy_to(size_t pos, const char *data, size_t size)
 
 		size_t shift = max(pos, x); shift = shift - (size_t)PAGE_ALIGN(shift);
 		size_t done = x + shift - pos;
-		memcpy2(mapped + shift, data + done, min(PAGE_SIZE - shift, size - done));
+		memcpy(mapped + shift, data + done, min(PAGE_SIZE - shift, size - done));
 
 		ZwUnmapViewOfSection(ZwCurrentProcess(), mapped);
 	}
@@ -77,7 +67,7 @@ char phy_memcpy_from(char *data, size_t pos, size_t size)
 
 		size_t shift = max(pos, x); shift = shift - (size_t)PAGE_ALIGN(shift);
 		size_t done = x + shift - pos;
-		memcpy2(data + done, mapped + shift, min(PAGE_SIZE - shift, size - done));
+		memcpy(data + done, mapped + shift, min(PAGE_SIZE - shift, size - done));
 
 		ZwUnmapViewOfSection(ZwCurrentProcess(), mapped);
 	}
@@ -91,13 +81,6 @@ char write_boot_image(char *data, size_t size)
 	if (phy_memcpy_to(BOOT_IMAGE_BASE, data, size)) {
 		DWORD base = (DWORD)BOOT_IMAGE_BASE;
 		if (phy_memcpy_to(BIOS_WARM_RESET_VECTOR, (char*)&base, sizeof(base))) {
-			PHYSICAL_ADDRESS pa;
-			pa.QuadPart = 0x00000000FFFFFFFF;
-			char *t = MmAllocateContiguousMemory(8192, pa);
-			if (t && phy_memcpy_from(t, 0x7010, 8191)) {
-				write_file(L"\\DosDevices\\C:\\booter_message.txt", 0, t, 8191);
-			}
-			MmFreeContiguousMemory(t);
 			return 1;
 		}
 	}
