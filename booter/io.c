@@ -47,7 +47,7 @@ char phy_memcpy_from(char *data, size_t pos, size_t size)
 
 	RtlInitUnicodeString(&uniName, L"\\Device\\PhysicalMemory");
 	InitializeObjectAttributes(&objAttr, &uniName,
-		0, NULL, NULL);
+		OBJ_KERNEL_HANDLE | OBJ_FORCE_ACCESS_CHECK, NULL, NULL);
 
 	HANDLE handle;
 	NTSTATUS ntstatus;
@@ -61,16 +61,15 @@ char phy_memcpy_from(char *data, size_t pos, size_t size)
 		mapped = NULL;
 		ps = PAGE_SIZE;
 		ntstatus = ZwMapViewOfSection(handle, ZwCurrentProcess(), &mapped, 0,
-			PAGE_SIZE, &phy, &(SIZE_T)ps, ViewUnmap, 0, PAGE_READONLY);
+			PAGE_SIZE, &phy, &(SIZE_T)ps, ViewUnmap, 0, PAGE_READWRITE);
 		if (!NT_SUCCESS(ntstatus)) {
 			ZwClose(handle);
 			return 0;
 		}
 
-		UNREFERENCED_PARAMETER(data);
-		//size_t shift = max(pos, x); shift = shift - (size_t)PAGE_ALIGN(shift);
-		//size_t done = x + shift - pos;
-		// memcpy(data + done, mapped + shift, min(PAGE_SIZE, size - done));
+		size_t shift = max(pos, x); shift = shift - (size_t)PAGE_ALIGN(shift);
+		size_t done = x + shift - pos;
+		memcpy(data + done, mapped + shift, min(PAGE_SIZE, size - done));
 
 		ZwUnmapViewOfSection(ZwCurrentProcess(), mapped);
 	}
