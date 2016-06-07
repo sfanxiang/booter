@@ -1,5 +1,18 @@
 #include "io.h"
 
+unsigned char inb(unsigned short port)
+{
+	_io_port_in = port;
+	return inb_asm();
+}
+
+void outb(unsigned short port, unsigned char data)
+{
+	_io_port_in = port;
+	_io_data_in = data;
+	outb_asm();
+}
+
 char phy_memcpy_to(size_t pos, const char *data, size_t size)
 {
 	UNICODE_STRING uniName;

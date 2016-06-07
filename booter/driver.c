@@ -41,6 +41,15 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 			}
 			cmos_set_warm_reset();
 			break;
+		case 'o':
+			if (run_size - i > 3) {
+				outb((unsigned short)run_buffer[i + 1] + ((unsigned short)run_buffer[i + 2]) * 256, run_buffer[i + 3]);
+			}
+		case 'i':
+			if (run_size - i > 2) {
+				unsigned char data = inb((unsigned short)run_buffer[i + 1] + ((unsigned short)run_buffer[i + 2]) * 256);
+				write_file(MESSAGE_FILE, 0, (char*)&data, sizeof(data));
+			}
 		case 'r':
 			reboot();
 			break;

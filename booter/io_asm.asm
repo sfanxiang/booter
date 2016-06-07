@@ -3,7 +3,25 @@ ifndef X64
 .model flat, c
 endif
 
+.data
+public _io_port_in, _io_data_in
+_io_port_in dw 0
+_io_data_in db 0
+
 .code
+
+inb_asm proc
+	mov dx, [_io_port_in]
+	in al, dx
+	ret
+inb_asm endp
+
+outb_asm proc
+	mov dx, [_io_port_in]
+	mov al, [_io_data_in]
+	out dx, al
+	ret
+outb_asm endp
 
 reboot proc
 	; cli
