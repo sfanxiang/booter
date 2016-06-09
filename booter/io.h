@@ -19,7 +19,7 @@ void outb(unsigned short port, unsigned char data);
 #define BIOS_WARM_RESET_VECTOR ((size_t)0x467L)
 #define BOOT_IMAGE_BASE ((size_t)0x8000L)
 #define BIOS_IMAGE_BASE ((size_t)0x80000L)
-#define BIOS_IMAGE_ENTRY_SEG_OFF ((size_t)0x9000fff0L)
+#define BIOS_IMAGE_ENTRY_SEG_OFF ((size_t)0x9fff0000L)
 
 char phy_memcpy_to(size_t pos, const char *data, size_t size);
 char phy_memcpy_from(char *data, size_t pos, size_t size);
