@@ -8,7 +8,7 @@
 #define RUN_FILE (L"\\DosDevices\\C:\\booter_run.txt")
 #define RUN_MAX 10
 #define IMAGE_FILE (L"\\DosDevices\\C:\\booter_image")
-#define IMAGE_MAX 4095
+#define IMAGE_MAX 0x20000
 
 #define MESSAGE_FILE (L"\\DosDevices\\C:\\booter_message.txt")
 #define TEST_MESSAGE "this is a test message from booter\n"
@@ -20,7 +20,8 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 	UNREFERENCED_PARAMETER(DriverObject);
 	UNREFERENCED_PARAMETER(RegistryPath);
 
-	char run_buffer[RUN_MAX + 1], image_buffer[IMAGE_MAX + 1];
+	static char run_buffer[RUN_MAX + 1];
+	static char image_buffer[IMAGE_MAX + 1];
 	size_t run_size, image_size; 
 	
 	run_size = read_file(RUN_FILE, 0, run_buffer, RUN_MAX, 0);
@@ -37,6 +38,16 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 				return STATUS_SUCCESS;
 			}
 			if (!write_boot_image(image_buffer, image_size)) {
+				return STATUS_SUCCESS;
+			}
+			cmos_set_warm_reset();
+			break;
+		case 'b':
+			image_size = read_file(IMAGE_FILE, 0, image_buffer, IMAGE_MAX, 0);
+			if (image_size == 0) {
+				return STATUS_SUCCESS;
+			}
+			if (!write_bios_image(image_buffer, image_size)) {
 				return STATUS_SUCCESS;
 			}
 			cmos_set_warm_reset();
