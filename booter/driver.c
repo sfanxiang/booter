@@ -12,7 +12,7 @@
 
 #define MESSAGE_FILE (L"\\DosDevices\\C:\\booter_message.txt")
 #define TEST_MESSAGE "this is a test message from booter\n"
-#define DUMP_FILE (L"\\DosDevices\\C:\\booter_dump.txt")
+#define DUMP_FILE (L"\\DosDevices\\C:\\booter_dump")
 
 DRIVER_INITIALIZE DriverEntry;
 
