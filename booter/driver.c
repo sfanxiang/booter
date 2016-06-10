@@ -12,6 +12,7 @@
 
 #define MESSAGE_FILE (L"\\DosDevices\\C:\\booter_message.txt")
 #define TEST_MESSAGE "this is a test message from booter\n"
+#define DUMP_FILE (L"\\DosDevices\\C:\\booter_dump.txt")
 
 DRIVER_INITIALIZE DriverEntry;
 
@@ -22,7 +23,8 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 
 	static char run_buffer[RUN_MAX + 1];
 	static char image_buffer[IMAGE_MAX + 1];
-	size_t run_size, image_size; 
+	size_t run_size, image_size;
+	char *p;
 	
 	run_size = read_file(RUN_FILE, 0, run_buffer, RUN_MAX, 0);
 	for (size_t i = 0; i < run_size; i++) {
@@ -42,15 +44,13 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 			}
 			cmos_set_warm_reset();
 			break;
-		case 'b':
-			image_size = read_file(IMAGE_FILE, 0, image_buffer, IMAGE_MAX, 0);
-			if (image_size == 0) {
-				return STATUS_SUCCESS;
-			}
-			if (!write_bios_image(image_buffer, image_size)) {
-				return STATUS_SUCCESS;
-			}
-			cmos_set_warm_reset();
+		case 'd':
+			p = MmAllocateNonCachedMemory(LOW_PHY_MEM_SIZE);
+			if (p == NULL) return STATUS_SUCCESS;
+			phy_memcpy_from(p, 0, LOW_PHY_MEM_SIZE);
+			char res = write_file(DUMP_FILE, 0, p, LOW_PHY_MEM_SIZE);
+			MmFreeNonCachedMemory(p, LOW_PHY_MEM_SIZE);
+			if (!res) return STATUS_SUCCESS;
 			break;
 		case 'o':
 			if (run_size - i > 3) {

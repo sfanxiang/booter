@@ -99,14 +99,3 @@ char write_boot_image(char *data, size_t size)
 	}
 	return 0;
 }
-
-char write_bios_image(char *data, size_t size)
-{
-	if (phy_memcpy_to(BIOS_IMAGE_BASE, data, size)) {
-		DWORD entry = (DWORD)BIOS_IMAGE_ENTRY_SEG_OFF;
-		if (phy_memcpy_to(BIOS_WARM_RESET_VECTOR, (char*)&entry, sizeof(entry))) {
-			return 1;
-		}
-	}
-	return 0;
-}

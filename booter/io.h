@@ -16,14 +16,13 @@ void __cdecl cmos_set_warm_reset();
 unsigned char inb(unsigned short port);
 void outb(unsigned short port, unsigned char data);
 
+#define LOW_PHY_MEM_SIZE 0x100000
+
 #define BIOS_WARM_RESET_VECTOR ((size_t)0x467L)
 #define BOOT_IMAGE_BASE ((size_t)0x8000L)
-#define BIOS_IMAGE_BASE ((size_t)0x80000L)
-#define BIOS_IMAGE_ENTRY_SEG_OFF ((size_t)0x9fff0000L)
 
 char phy_memcpy_to(size_t pos, const char *data, size_t size);
 char phy_memcpy_from(char *data, size_t pos, size_t size);
 char write_boot_image(char *data, size_t size);
-char write_bios_image(char *data, size_t size);
 
 #endif
