@@ -26,7 +26,7 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 
 	static char run_buffer[RUN_MAX + 1];
 	static char image_buffer[IMAGE_MAX + 1];
-	size_t run_size, image_size;
+	size_t run_size, image_size, payload_size;
 	PHYSICAL_ADDRESS pa;
 	char *p; char res;
 	
@@ -55,12 +55,12 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 			pa.QuadPart = PAYLOAD_ADDR_MAX;
 			p = MmAllocateContiguousMemory(PAYLOAD_MAX, pa);
 			if (p == NULL) return STATUS_SUCCESS;
-			res = read_file(PAYLOAD_FILE, 0, p, PAYLOAD_MAX, 0);
-			if (!res) {
+			payload_size = read_file(PAYLOAD_FILE, 0, p, PAYLOAD_MAX, 0);
+			if (payload_size == 0) {
 				MmFreeContiguousMemory(p);
 				return STATUS_SUCCESS;
 			}
-			res = write_payload_addr(MmGetPhysicalAddress(p).QuadPart);	// todo phy addr
+			res = write_payload_addr((size_t)MmGetPhysicalAddress(p).QuadPart);
 			if (!res) {
 				MmFreeContiguousMemory(p);
 				return STATUS_SUCCESS;
