@@ -54,7 +54,6 @@ NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING Regi
 			// write payload (often used as kernel initrd)
 			pa.QuadPart = PAYLOAD_ADDR_MAX;
 			p = MmAllocateContiguousMemory(PAYLOAD_MAX, pa);
-			write_file(MESSAGE_FILE, 0, (char*)&p, sizeof(p));
 			if (p == NULL) return STATUS_SUCCESS;
 			payload_size = read_file(PAYLOAD_FILE, 0, p, PAYLOAD_MAX, 0);
 			if (payload_size == 0) {
