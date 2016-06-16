@@ -99,3 +99,8 @@ char write_boot_image(char *data, size_t size)
 	}
 	return 0;
 }
+
+char write_payload_addr(size_t addr)
+{
+	return phy_memcpy_to(BOOT_IMAGE_PAYLOAD_PTR, &addr, 4);
+}

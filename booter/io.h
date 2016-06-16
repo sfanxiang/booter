@@ -20,9 +20,11 @@ void outb(unsigned short port, unsigned char data);
 
 #define BIOS_WARM_RESET_VECTOR ((size_t)0x467L)
 #define BOOT_IMAGE_BASE ((size_t)0x8000L)
+#define BOOT_IMAGE_PAYLOAD_PTR (BOOT_IMAGE_BASE + 5)
 
 char phy_memcpy_to(size_t pos, const char *data, size_t size);
 char phy_memcpy_from(char *data, size_t pos, size_t size);
 char write_boot_image(char *data, size_t size);
+char write_payload_addr(size_t addr);
 
 #endif
