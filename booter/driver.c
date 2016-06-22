@@ -10,7 +10,7 @@
 #define IMAGE_FILE (L"\\DosDevices\\C:\\booter_image")
 #define IMAGE_MAX 0x20000
 #define PAYLOAD_FILE (L"\\DosDevices\\C:\\booter_payload")
-#define PAYLOAD_MAX (1048576 * 2)
+#define PAYLOAD_MAX (1048576 * 8)
 #define PAYLOAD_ADDR_MAX 0x7fffffff
 
 #define MESSAGE_FILE (L"\\DosDevices\\C:\\booter_message.txt")
